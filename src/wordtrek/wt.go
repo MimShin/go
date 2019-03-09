@@ -6,6 +6,7 @@ import (
     "strings"
     "sync"
     "util"
+    "sort"
 )
 
 type WordTrek struct {
@@ -26,32 +27,20 @@ func (wt *WordTrek) Solve(tableStr string, wordLengths []int, dict dict.Dict) {
 
 	wt.wtns[""] = WTNode{
 		words: []string{}, 
+        wordLengths: wordLengths,
 		table: t }
 
     maxLevels := len(wt.wordLengths)
     for i:=0; i<maxLevels; i++ {
-
         fmt.Printf("Level %d: %d node(s)\n", i, len(wt.wtns))
-
-        workingList := make(map[string]WTNode)
-        for key, wtn := range wt.wtns {
+        for _, wtn := range wt.wtns {
             if wtn.level == i {
-                workingList[key] = wtn
+                wt.findWord(wtn)
             }
-        }
-
-        for _, wtn := range workingList {
-            wt.findWord(wtn)
-        }
-    }
-
-    for _, wtn := range wt.wtns {
-        if wtn.level == maxLevels {
-            //wtn.Print();
-            fmt.Printf("%s - %d - %c\n", wtn.words, wt.wordLengths, wtn.table)
         }
     }
 }
+
 
 func (wt *WordTrek) findWord(wtn WTNode) {
 
@@ -115,10 +104,35 @@ func (wt *WordTrek) findWordAtRC(wtn WTNode, row int, col int, prefix string) {
     t[row][col] = ch
 }
 
+
 func (wt *WordTrek) addTowtns(wtn WTNode) {
 
-//    fmt.Println("addTowtns", strings.Join(wtn.words, ""))
+    // fmt.Println("addTowtns", strings.Join(wtn.words, ""))
+
+    s := make([]string, len(wtn.words))
+    copy(s, wtn.words)
+    sort.Strings(s)
+    key := wtn.table.ToStr() + strings.Join(s, "")
+
     wt.mu.Lock()
     defer wt.mu.Unlock()
-    wt.wtns[wtn.table.ToStr() + strings.Join(wtn.words, "")] = wtn
+    wt.wtns[key] = wtn
 }
+
+
+func (wt *WordTrek) PrintProblem() {
+    wtn := wt.wtns[""]
+    wtn.Print()
+}
+
+
+func (wt *WordTrek) Print() {
+    maxLevels := len(wt.wordLengths)
+    for _, wtn := range wt.wtns {
+        if wtn.level == maxLevels {
+            //wtn.Print();
+            fmt.Printf("%s\n", wtn.words)
+        }
+    }
+}
+
