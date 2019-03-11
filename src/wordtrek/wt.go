@@ -33,24 +33,34 @@ func (wt *WordTrek) Solve(tableStr string, wordLengths []int, dict dict.Dict) {
     maxLevels := len(wt.wordLengths)
     for i:=0; i<maxLevels; i++ {
         fmt.Printf("Level %d: %d node(s)\n", i, len(wt.wtns))
-        for _, wtn := range wt.wtns {
+
+        workList := make(map[string]WTNode)
+        for key, wtn := range wt.wtns {
             if wtn.level == i {
-                wt.findWord(wtn)
+                workList[key] = wtn
             }
         }
+
+        var wg sync.WaitGroup
+        for _, wtn := range workList {
+            wg.Add(1)
+            go wt.findWord(&wg, wtn)
+        }
+        wg.Wait()
     }
 }
 
 
-func (wt *WordTrek) findWord(wtn WTNode) {
+func (wt *WordTrek) findWord(wgOuter* sync.WaitGroup, wtn WTNode) {
+
+    defer wgOuter.Done()
 
     var wg sync.WaitGroup
 
     t := wtn.table
-    wg.Add(len(t) * len(t[0]))
-
     for r:=0; r<len(t); r++ {
         for c:=0; c<len(t[0]); c++ {
+            wg.Add(1)
             go wt.goFindWordAtRC(&wg, wtn.Clone(), r, c) 
         }
     }
