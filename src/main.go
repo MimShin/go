@@ -37,6 +37,15 @@ func main() {
     wl = []int{4, 3, 4, 3, 4, 3, 4};
     s = "xflga oadtk vblbo oooob glbol"; 
 
+    wl = []int{3, 6, 6, 5, 5}
+    s = "ydmcr erate ajjte nepub hosui"
+
+    wl = []int{4, 6, 5, 5, 5}
+    s = "ynfgr eocla ljati gesri udeht"
+
+    wl = []int{5, 4, 6, 10}
+    s = "rtptr oelep ceaco ktnie ikehl"
+
     wt := wordtrek.WordTrek{}
     start := time.Now()
     wt.Solve(s, wl, d);

@@ -62,10 +62,24 @@ func (t Table) DropDown() Table {
 }
 
 func (t Table) Print() {
+
+    fmt.Print(" ");
+    for c:=0; c<len(t[0]); c++ {
+        fmt.Print("--");
+    }
+    fmt.Println();
+
     for r:=0; r<len(t); r++ {
+        fmt.Print("|");
         for c:=0; c<len(t[0]); c++ {
             fmt.Printf("%2c", t[r][c]);
         }
-        fmt.Println();
+        fmt.Println(" |");
     }
+
+    fmt.Print(" ");
+    for c:=0; c<len(t[0]); c++ {
+        fmt.Print("--");
+    }
+    fmt.Println();
 }

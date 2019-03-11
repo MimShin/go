@@ -33,6 +33,7 @@ func (wt *WordTrek) Solve(tableStr string, wordLengths []int, dict dict.Dict) {
         wordLengths: wordLengths,
 		table: t }
 
+    wtn.Print(true)
     go wt.addNode(wtn)
 
     for {
@@ -41,7 +42,7 @@ func (wt *WordTrek) Solve(tableStr string, wordLengths []int, dict dict.Dict) {
             go wt.findWord(wtn)
         // terminate if there is no node available for 1 second!
         case <-time.After(1 * time.Second):
-            fmt.Println("That's all folks!")
+            fmt.Println("No activity in 1 second. That's all folks!")
             return
         }
     }
