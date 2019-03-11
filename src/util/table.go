@@ -67,7 +67,7 @@ func (t Table) Print() {
     for c:=0; c<len(t[0]); c++ {
         fmt.Print("--");
     }
-    fmt.Println();
+    fmt.Println("-");
 
     for r:=0; r<len(t); r++ {
         fmt.Print("|");
@@ -81,5 +81,5 @@ func (t Table) Print() {
     for c:=0; c<len(t[0]); c++ {
         fmt.Print("--");
     }
-    fmt.Println();
+    fmt.Println("-");
 }
