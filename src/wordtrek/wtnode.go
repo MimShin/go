@@ -29,5 +29,5 @@ func (wt *WTNode) Clone() WTNode {
 
 func (wt *WTNode) Print() {
     fmt.Printf("%d: %d, %s\n", wt.level, wt.wordLengths, wt.words)
-    wt.table.Print()
+//    wt.table.Print()
 }

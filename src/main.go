@@ -38,6 +38,4 @@ func main() {
     start := time.Now()
     wt.Solve(s, wl, d);
     fmt.Printf("Elapsed time: %s\n", time.Since(start));
-    wt.PrintProblem();
-    wt.Print();
 }
