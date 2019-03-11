@@ -4,12 +4,15 @@ import (
     "fmt"
     "dict"
     "util"
-    "sync"
     "time"
+    "strings"
+    "sync"
+    "sort"
 )
 
 type WordTrek struct {
-    wg sync.WaitGroup
+    mu sync.Mutex
+    wtns map[string]WTNode
     wtc chan WTNode
     dict dict.Dict
     rows, cols int
@@ -23,6 +26,7 @@ func (wt *WordTrek) Solve(tableStr string, wordLengths []int, dict dict.Dict) {
     wt.wtc = make(chan WTNode) 
     wt.wordLengths = wordLengths;
     wt.dict = dict
+    wt.wtns = make(map[string]WTNode)
 
     fmt.Println("OK")
 
@@ -45,6 +49,19 @@ func (wt *WordTrek) Solve(tableStr string, wordLengths []int, dict dict.Dict) {
 }
 
 func (wt *WordTrek) addNode(wtn WTNode) {
+    defer wt.mu.Unlock()
+
+    s := make([]string, len(wtn.words))
+    copy(s, wtn.words)
+    sort.Strings(s)
+    key :=  wtn.table.ToStr() + strings.Join(s, "")
+
+    wt.mu.Lock()
+    if _, ok := wt.wtns[key]; ok {
+        return
+    }
+
+    wt.wtns[key] = wtn
     wt.wtc <- wtn
 }
 
@@ -59,7 +76,6 @@ func (wt *WordTrek) findWord(wtn WTNode) {
     t := wtn.table
     for r:=0; r<len(t); r++ {
         for c:=0; c<len(t[0]); c++ {
-            //wt.wg.Add(1)
             go wt.findWordAtRC(wtn.Clone(), r, c, "") 
         }
     }
@@ -79,10 +95,10 @@ func (wt *WordTrek) findWordAtRC(wtn WTNode, row int, col int, prefix string) {
 
     if len(prefix) == wt.wordLengths[wtn.level] - 1 {
         if wt.dict.Look(prefix + string(ch)) {
-            wt.wtc <- WTNode{
+            go wt.addNode(WTNode{
                 words: append(wtn.words, prefix + string(ch)), 
                 table: wtn.table.Clone().DropDown(),
-                level: wtn.level + 1 }
+                level: wtn.level + 1 })
         }
         t[row][col] = ch
         return
