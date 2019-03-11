@@ -3,15 +3,17 @@ package wordtrek
 import (
     "fmt"
     "dict"
+    "util"
+    "time"
     "strings"
     "sync"
-    "util"
     "sort"
 )
 
 type WordTrek struct {
     mu sync.Mutex
     wtns map[string]WTNode
+    wtc chan WTNode
     dict dict.Dict
     rows, cols int
     wordLengths []int
@@ -21,63 +23,67 @@ func (wt *WordTrek) Solve(tableStr string, wordLengths []int, dict dict.Dict) {
 
     t := util.StrToTable(tableStr)
     wt.rows, wt.cols = len(t), len(t[0])
-    wt.wtns = make(map[string]WTNode) 
+    wt.wtc = make(chan WTNode) 
     wt.wordLengths = wordLengths;
     wt.dict = dict
+    wt.wtns = make(map[string]WTNode)
 
-	wt.wtns[""] = WTNode{
+	wtn := WTNode{
 		words: []string{}, 
         wordLengths: wordLengths,
 		table: t }
 
-    maxLevels := len(wt.wordLengths)
-    for i:=0; i<maxLevels; i++ {
-        fmt.Printf("Level %d: %d node(s)\n", i, len(wt.wtns))
+    go wt.addNode(wtn)
 
-        workList := make(map[string]WTNode)
-        for key, wtn := range wt.wtns {
-            if wtn.level == i {
-                workList[key] = wtn
-            }
+    for {
+        select {
+        case wtn := <- wt.wtc: 
+            go wt.findWord(wtn)
+        // terminate if there is no node available for 1 second!
+        case <-time.After(1 * time.Second):
+            fmt.Println("That's all folks!")
+            return
         }
-
-        var wg sync.WaitGroup
-        for _, wtn := range workList {
-            wg.Add(1)
-            go wt.findWord(&wg, wtn)
-        }
-        wg.Wait()
     }
 }
 
+func (wt *WordTrek) addNode(wtn WTNode) {
 
-func (wt *WordTrek) findWord(wgOuter* sync.WaitGroup, wtn WTNode) {
+    s := make([]string, len(wtn.words))
+    copy(s, wtn.words)
+    sort.Strings(s)
+    key :=  wtn.table.ToStr() + strings.Join(s, "")
 
-    defer wgOuter.Done()
+    defer wt.mu.Unlock()
+    wt.mu.Lock()
 
-    var wg sync.WaitGroup
+    // don't add the similar nodes
+    if _, ok := wt.wtns[key]; ok {
+        return
+    }
+
+    wt.wtns[key] = wtn
+    wt.wtc <- wtn
+}
+
+func (wt *WordTrek) findWord(wtn WTNode) {
+
+    //fmt.Printf("findWord %c, %s\n", wtn.table, wtn.words);
+    if len(wt.wordLengths) == len(wtn.words) {
+        wtn.Print(false)
+        return
+    }
 
     t := wtn.table
     for r:=0; r<len(t); r++ {
         for c:=0; c<len(t[0]); c++ {
-            wg.Add(1)
-            go wt.goFindWordAtRC(&wg, wtn.Clone(), r, c) 
+            go wt.findWordAtRC(wtn.Clone(), r, c, "") 
         }
     }
-    
-    wg.Wait()
 }
-
-
-func (wt *WordTrek) goFindWordAtRC(wg* sync.WaitGroup, wtn WTNode, row int, col int) {
-    // fmt.Printf("goFindWordAtRC %c @%d,%d %d\n", wtn.table, row, col);
-    defer wg.Done()
-    wt.findWordAtRC(wtn, row, col, "")
-}
-
 
 func (wt *WordTrek) findWordAtRC(wtn WTNode, row int, col int, prefix string) {
-    // fmt.Printf("findWordsAtRC: %c, %d, %d, %q\n", wtn.table, row, col, prefix)
+    //fmt.Printf("findWordsAtRC: %c, %d, %d, %d, %q\n", wtn.table, row, col, prefix)
 
     t := wtn.table
 
@@ -88,12 +94,11 @@ func (wt *WordTrek) findWordAtRC(wtn WTNode, row int, col int, prefix string) {
     } 
     t[row][col] = '.'
 
-    if len(prefix) == wt.wordLengths[wtn.level] - 1 {
+    if len(prefix) == wt.wordLengths[len(wtn.words)] - 1 {
         if wt.dict.Look(prefix + string(ch)) {
-            wt.addTowtns(WTNode{
+            go wt.addNode(WTNode{
                 words: append(wtn.words, prefix + string(ch)), 
-                table: wtn.table.Clone().DropDown(),
-                level: wtn.level + 1 })
+                table: wtn.table.Clone().DropDown() })
         }
         t[row][col] = ch
         return
@@ -113,36 +118,3 @@ func (wt *WordTrek) findWordAtRC(wtn WTNode, row int, col int, prefix string) {
 
     t[row][col] = ch
 }
-
-
-func (wt *WordTrek) addTowtns(wtn WTNode) {
-
-    // fmt.Println("addTowtns", strings.Join(wtn.words, ""))
-
-    s := make([]string, len(wtn.words))
-    copy(s, wtn.words)
-    sort.Strings(s)
-    key := wtn.table.ToStr() + strings.Join(s, "")
-
-    wt.mu.Lock()
-    defer wt.mu.Unlock()
-    wt.wtns[key] = wtn
-}
-
-
-func (wt *WordTrek) PrintProblem() {
-    wtn := wt.wtns[""]
-    wtn.Print()
-}
-
-
-func (wt *WordTrek) Print() {
-    maxLevels := len(wt.wordLengths)
-    for _, wtn := range wt.wtns {
-        if wtn.level == maxLevels {
-            //wtn.Print();
-            fmt.Printf("%s\n", wtn.words)
-        }
-    }
-}
-

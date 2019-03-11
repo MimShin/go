@@ -8,26 +8,26 @@ import (
 type WTNode struct{ 
 	words []string
 	wordLengths []int
-	level int
 	table util.Table
 }
 
-func (wt *WTNode) Clone() WTNode {
+func (wtn *WTNode) Clone() WTNode {
 
-    wl := make([]int, len(wt.wordLengths))
-    copy(wl, wt.wordLengths)
+    wl := make([]int, len(wtn.wordLengths))
+    copy(wl, wtn.wordLengths)
 
-    w := make([]string, len(wt.words))
-    copy(w, wt.words)
+    w := make([]string, len(wtn.words))
+    copy(w, wtn.words)
 
     return WTNode {
         words: w,
         wordLengths: wl,
-        level: wt.level,
-        table: wt.table.Clone()}
+        table: wtn.table.Clone()}
 }
 
-func (wt *WTNode) Print() {
-    fmt.Printf("%d: %d, %s\n", wt.level, wt.wordLengths, wt.words)
-    wt.table.Print()
+func (wtn *WTNode) Print(printTable bool) {
+    fmt.Printf("%s, %d\n", wtn.words, wtn.wordLengths)
+    if printTable {
+        wtn.table.Print()
+    }
 }
