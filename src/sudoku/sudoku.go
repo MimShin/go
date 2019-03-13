@@ -43,26 +43,25 @@ func (s Sudoku) Solve() bool {
 }
 
 func (s Sudoku) solveAtRC(rc int) bool {
-	s.Print()
 	if rc >= s.size * s.size {
 		return true
 	}
 
 	t := s.table
 	r, c := rc / s.size, rc % s.size
+
 	if t[r][c] != 0 {
 		return s.solveAtRC(rc+1)
 	}
 
 	for i:=1; i<=9; i++ {
 		t[r][c] = i
-		if s.CheckCell(r, c) == false {
-			continue
-		} else if s.solveAtRC(rc+1) {
+		if s.CheckCell(r, c) && s.solveAtRC(rc+1) {
 			return true
 		}
 	}
 
+	t[r][c] = 0
 	return false
 }
 
@@ -86,7 +85,7 @@ func (s Sudoku) CheckRow(row int) bool {
 	for i:=0; i<len(r)-1; i++ {
 		for j:=i+1; j<len(r); j++ {
 			if r[i] != 0 && r[i] == r[j] {
-				fmt.Println("failed @row: ", row, i)
+				//fmt.Println("failed @row: ", row, i, r[i])
 				return false
 			}
 		}
@@ -99,7 +98,7 @@ func (s Sudoku) CheckCol(col int) bool {
 	for i:=0; i<s.size-1; i++ {
 		for j:=i+1; j<s.size; j++ {
 			if t[i][col] != 0 && t[i][col] == t[j][col] {
-				fmt.Println("failed @col: ", i, col)
+				//fmt.Println("failed @col: ", i, col, t[i][col])
 				return false
 			}
 		}
@@ -109,7 +108,8 @@ func (s Sudoku) CheckCol(col int) bool {
 
 func (s Sudoku) CheckSubgrid(row int, col int) bool {
 
-	r0, c0 := row / s.sgSize, col / s.sgSize
+	r0 := (row / s.sgSize) * s.sgSize
+	c0 := (col / s.sgSize) * s.sgSize
 	t := s.table
 
 	for x := 0; x <s.size-1; x++ {
@@ -117,7 +117,7 @@ func (s Sudoku) CheckSubgrid(row int, col int) bool {
 			r1, c1 := x / s.sgSize + r0, x % s.sgSize + c0
 			r2, c2 := y / s.sgSize + r0, y % s.sgSize + c0
 			if t[r1][c1] != 0 && t[r1][c1] == t[r2][c2] {
-				fmt.Println("failed @subGrid: ", r1, c1)
+				//fmt.Println("failed @subGrid: ", r1, c1, t[r1][c1])
 				return false
 			}
 		}
