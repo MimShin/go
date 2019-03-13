@@ -38,6 +38,52 @@ func Init(sudoku string) Sudoku {
 	return s
 }
 
+func (si Sudoku) Clone() Sudoku {
+
+	t := make([][]int, si.size)
+
+	for r:=0; r<si.size; r++ {
+		t[r] = make([]int, si.size)
+		copy(t[r], si.table[r])
+	}
+
+	s := Sudoku{}
+	s.table = t
+	s.size = len(t)
+	s.sgSize = int(math.Sqrt(float64(s.size)))
+
+	return s
+}
+
+func (s Sudoku) GoSolve() Sudoku {
+    solved := make(chan Sudoku)
+	s.goSolveAtRC(0, solved)
+	return <- solved
+}
+
+func (s Sudoku) goSolveAtRC(rc int, solved chan Sudoku) {
+	if rc >= s.size * s.size {
+		solved <- s
+		return
+	}
+
+	t := s.table
+	r, c := rc / s.size, rc % s.size
+
+	if t[r][c] != 0 {
+		go s.goSolveAtRC(rc+1, solved)
+        return
+	}
+
+	for i:=1; i<=9; i++ {
+		t[r][c] = i
+		if s.CheckCell(r, c) {
+			//fmt.Println(rc, 3, i)
+			go s.Clone().goSolveAtRC(rc+1, solved)
+		}
+	}
+}
+
 func (s Sudoku) Solve() bool {
 	return s.solveAtRC(0)
 }
@@ -64,7 +110,6 @@ func (s Sudoku) solveAtRC(rc int) bool {
 	t[r][c] = 0
 	return false
 }
-
 
 func (s Sudoku) Check() bool {
 
