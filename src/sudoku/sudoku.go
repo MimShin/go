@@ -37,21 +37,40 @@ func Init(sudoku string) Sudoku {
 
 	return s
 }
-/*
-func (s Sudoku) Solve() {
-	for i:=0; i<len(s); i++ {
-		s.checkRows(i);
-		s.checkCols();
-		s.checkSGs();
-	}
+
+func (s Sudoku) Solve() bool {
+	return s.solveAtRC(0)
 }
-*/
+
+func (s Sudoku) solveAtRC(rc int) bool {
+	s.Print()
+	if rc >= s.size * s.size {
+		return true
+	}
+
+	t := s.table
+	r, c := rc / s.size, rc % s.size
+	if t[r][c] != 0 {
+		return s.solveAtRC(rc+1)
+	}
+
+	for i:=1; i<=9; i++ {
+		t[r][c] = i
+		if s.CheckCell(r, c) == false {
+			continue
+		} else if s.solveAtRC(rc+1) {
+			return true
+		}
+	}
+
+	return false
+}
+
 
 func (s Sudoku) Check() bool {
 
 	for i:=0; i<s.size; i++ {
-		result := s.CheckRow(i) && s.CheckCol(i) && s.CheckCell(i*s.sgSize, i*s.sgSize)
-		if result == false {
+		if s.CheckCell(i, i % s.sgSize* s.sgSize + i / s.sgSize) == false {
 			return false
 		}
 	}
