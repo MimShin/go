@@ -3,6 +3,8 @@ package wordtrek
 import (
     "fmt"
     "util"
+    "sort"
+    "strings"
 )
 
 type WTNode struct{ 
@@ -23,6 +25,13 @@ func (wtn *WTNode) Clone() WTNode {
         words: w,
         wordLengths: wl,
         table: wtn.table.Clone()}
+}
+
+func (wtn *WTNode) Key() string {
+    s := make([]string, len(wtn.words))
+    copy(s, wtn.words)
+    sort.Strings(s)
+    return wtn.table.ToStr() + strings.Join(s, "")
 }
 
 func (wtn *WTNode) Print(printTable bool) {

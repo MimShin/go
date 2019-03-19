@@ -5,14 +5,11 @@ import (
     "dict"
     "util"
     "time"
-    "strings"
-    "sync"
-    "sort"
 )
 
 type WordTrek struct {
-    mu sync.Mutex
-    wtns map[string]WTNode
+//    mu sync.Mutex
+    visited map[string]bool
     wtc chan WTNode
     dict dict.Dict
     rows, cols int
@@ -26,7 +23,7 @@ func (wt *WordTrek) Solve(tableStr string, wordLengths []int, dict dict.Dict) {
     wt.wtc = make(chan WTNode) 
     wt.wordLengths = wordLengths;
     wt.dict = dict
-    wt.wtns = make(map[string]WTNode)
+    wt.visited = make(map[string]bool)
 
 	wtn := WTNode{
 		words: []string{}, 
@@ -34,37 +31,22 @@ func (wt *WordTrek) Solve(tableStr string, wordLengths []int, dict dict.Dict) {
 		table: t }
 
     wtn.Print(true)
-    go wt.addNode(wtn)
+    go func(){ wt.wtc <- wtn }()
 
     for {
         select {
         case wtn := <- wt.wtc: 
-            go wt.findWord(wtn)
+            key := wtn.Key()
+            if _, found := wt.visited[key]; !found {
+                wt.visited[key] = true
+                go wt.findWord(wtn)
+            }
         // terminate if there is no node available for 1 second!
         case <-time.After(1 * time.Second):
             fmt.Println("No activity in 1 second. That's all folks!")
             return
         }
     }
-}
-
-func (wt *WordTrek) addNode(wtn WTNode) {
-
-    s := make([]string, len(wtn.words))
-    copy(s, wtn.words)
-    sort.Strings(s)
-    key :=  wtn.table.ToStr() + strings.Join(s, "")
-
-    defer wt.mu.Unlock()
-    wt.mu.Lock()
-
-    // don't add the similar nodes
-    if _, ok := wt.wtns[key]; ok {
-        return
-    }
-
-    wt.wtns[key] = wtn
-    wt.wtc <- wtn
 }
 
 func (wt *WordTrek) findWord(wtn WTNode) {
@@ -97,9 +79,9 @@ func (wt *WordTrek) findWordAtRC(wtn WTNode, row int, col int, prefix string) {
 
     if len(prefix) == wt.wordLengths[len(wtn.words)] - 1 {
         if wt.dict.Look(prefix + string(ch)) {
-            go wt.addNode(WTNode{
+            wt.wtc <- WTNode{
                 words: append(wtn.words, prefix + string(ch)), 
-                table: wtn.table.Clone().DropDown() })
+                table: wtn.table.Clone().DropDown() }
         }
         t[row][col] = ch
         return
