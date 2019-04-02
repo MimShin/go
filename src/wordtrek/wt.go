@@ -8,7 +8,6 @@ import (
 )
 
 type WordTrek struct {
-//    mu sync.Mutex
     visited map[string]bool
     wtc chan WTNode
     dict dict.Dict
@@ -25,10 +24,10 @@ func (wt *WordTrek) Solve(tableStr string, wordLengths []int, dict dict.Dict) {
     wt.dict = dict
     wt.visited = make(map[string]bool)
 
-	wtn := WTNode{
-		words: []string{}, 
+    wtn := WTNode{
+        words: []string{}, 
         wordLengths: wordLengths,
-		table: t }
+        table: t }
 
     wtn.Print(true)
     go func(){ wt.wtc <- wtn }()

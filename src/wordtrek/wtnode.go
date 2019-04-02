@@ -8,9 +8,9 @@ import (
 )
 
 type WTNode struct{ 
-	words []string
-	wordLengths []int
-	table util.Table
+    words []string
+    wordLengths []int
+    table util.Table
 }
 
 func (wtn *WTNode) Clone() WTNode {

@@ -16,20 +16,20 @@ func main() {
     s := ""
     wl := []int{}
     
-    //s = "ce ak"
-    //wl = []int{4}
+    s = "ce ak"
+    wl = []int{4}
 
-    //s = "enee idgk bwua orfc"
-    //wl = []int{4, 5, 7}
+    s = "enee idgk bwua orfc"
+    wl = []int{4, 5, 7}
 
-    //wl = []int{4, 6, 6}; 
-    //s = "wses ogau rlnr bcef";
+    wl = []int{4, 6, 6}; 
+    s = "wses ogau rlnr bcef";
 
-    //wl = []int{3, 6, 7, 9};
-    //s = "mgeee oarpf resaf ntpwo ninec"; 
+    wl = []int{3, 6, 7, 9};
+    s = "mgeee oarpf resaf ntpwo ninec"; 
 
-    //wl = []int{5, 4, 9, 7};
-    //s = "adlgb nedtn oiawi giuqa rbsat"; 
+    wl = []int{5, 4, 9, 7};
+    s = "adlgb nedtn oiawi giuqa rbsat"; 
     
     wl = []int{7, 4, 8, 3, 3};
     s = "brigp eibfe ogaba lcbec cotea"; 
@@ -45,6 +45,9 @@ func main() {
 
     wl = []int{5, 4, 6, 10}
     s = "rtptr oelep ceaco ktnie ikehl"
+
+    wl = []int{9, 8, 4, 4}
+    s = "rdrep eagpa nanws izext eamet"
 
     wt := wordtrek.WordTrek{}
     start := time.Now()
