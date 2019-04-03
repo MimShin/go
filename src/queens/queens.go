@@ -5,33 +5,47 @@ import (
     "strings"
 )
 
-type Cell = struct {
+type Cell struct {
 	r, c int
 }
 
-func Solve(boardSize int) {
-	board := []Cell{} //make([]Cell, 0)
-	solve(0, boardSize, board)
+type Board struct {
+	Size int
+	board []Cell
 }
 
-func solve(row int, size int, cells []Cell) bool {
+func (board *Board) Solve() <-chan Board {
+	chn := make(chan Board)
+	go solve(0, board.Size, board.board, chn)
+	return chn
+}
+
+func solve(row int, size int, cells []Cell, chn chan Board) {
 
 	if len(cells) == size {
-		print(cells, size)
-		return true
+		chn <- Board{size, cells}
+		return
 	}
 
+	/*
 	for c:=0; c<size; c++ {
 		cell := Cell{row, c}
-		if conflict(cell, cells) {
-			continue
-		}
-		if solve(row+1, size, append(cells, cell)) {
-			return true
+		if conflict(cell, cells) == false {
+			solve(row+1, size, append(cells, cell), chn)
 		}
 	}
+	*/
 
-	return false
+	for i:=0; i<size; i++ {
+		go func(c int, cells []Cell) {
+			//fmt.Println("here:", row, c)
+			cell := Cell{row, c}
+			if conflict(cell, cells) == false {
+				solve(row+1, size, append(cells, cell), chn)
+			}
+		}(i, cells)
+	}
+
 }
 
 func conflict(c Cell, cells []Cell) bool {
@@ -59,26 +73,26 @@ func conflictCells(c1, c2 Cell) bool {
 	return false
 }
 
-func print(cells []Cell, size int) {
+func (board *Board) Print() {
 
 	queens := make(map[int]bool)
-	for _, c := range cells {
-		queens[c.r*size + c.c] = true
+	for _, c := range board.board {
+		queens[c.r*board.Size + c.c] = true
 	}
 
-    B := 9607 //9617
+    B := ' '
     Q := 'Q' // 9819 //'Q'
 
-    fmt.Println(" " + strings.Repeat("-", 2*size + 1))
-	for r:=0; r<size; r++ {
+    fmt.Println(" " + strings.Repeat("-", 2*board.Size + 1))
+	for r:=0; r<board.Size; r++ {
 		fmt.Print("|");
-		for c := 0; c < size; c++ {
+		for c := 0; c < board.Size; c++ {
             if (r+c) % 2 == 0 {
                 B = 9607
             } else {
                 B = ' '
             }
-			if queens[r*size + c] {
+			if queens[r*board.Size + c] {
 				fmt.Printf("%c%c", ' ', Q)
 			} else {
                 fmt.Printf("%c%c", ' ', B)
@@ -87,6 +101,6 @@ func print(cells []Cell, size int) {
 		fmt.Println(" |");
 	}
 
-    fmt.Println(" " + strings.Repeat("-", 2*size + 1))
-    fmt.Println(" Boardsize: ", size, "\n")
+    fmt.Println(" " + strings.Repeat("-", 2*board.Size + 1))
+    fmt.Println(" Boardsize: ", board.Size, "\n")
 }
