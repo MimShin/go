@@ -1,37 +1,33 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
-	"sync"
-	"time"
+  "fmt"
 )
 
 func main() {
-	n := 10
-	wg := sync.WaitGroup{}
-	mu := sync.Mutex{}
+  n1, n2 := 10, 10
 
-	routines := make(map[int]bool)
-	for i:=0; i<n; i++ {
-		wg.Add(1)
-		// WaitGroup and Mutex objects must be passed as address otherwise new objects will be created and they don't work
-		go boring(i, routines, &wg, &mu)
-	}
-	wg.Wait()
+  c1 := goBoring("Rosha", n1)
+  c2 := goBoring("Shana", n2)
+
+  for i:=0; i<n1+n2; i++ {
+    select {
+    case x := <-c1:
+      fmt.Println(x)
+    case x := <-c2:
+      fmt.Println(x)
+    }
+  }
 }
 
-func boring(n int, routines map[int]bool, wg* sync.WaitGroup, mu* sync.Mutex) {
+func goBoring(name string, count int) <-chan string {
+  c := make(chan string)  
+  go boring(name, count, c)
+  return c
+}
 
-	mu.Lock()	// Concurrent access problem without Mutex
-	routines[n] = false
-	mu.Unlock()
-
-	fmt.Printf("Boring %d\n", n)
-	time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
-	wg.Done()
-
-	mu.Lock()
-	routines[n] = true;
-	mu.Unlock()
+func boring(name string, count int, c chan string) {
+  for i:=0;i<count;i++ {
+    c <- fmt.Sprintf("%s: %d", name, i)
+  }
 }
