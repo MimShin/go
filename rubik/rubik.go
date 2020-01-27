@@ -50,6 +50,19 @@ func (cube *Cube) faces(i int) *Face {
 
 func (cube *Cube) Size() int { return size }
 
+func (cube *Cube) Key() string {
+	key := ""
+	for i := 0; i < 6; i++ {
+		f := cube.faces(i)
+		for r := 0; r < size; r++ {
+			for c := 0; c < size; c++ {
+				key += string(f[r][c])
+			}
+		}
+	}
+	return key
+}
+
 func (cube *Cube) String() string {
 	s := ""
 

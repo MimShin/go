@@ -2,9 +2,15 @@ package rubik
 
 import (
 	"fmt"
+	"sync"
 )
 
+var visitedCubes map[string]int
+var mux sync.Mutex
+
 func (cube *Cube) Solve(max int) string {
+	visitedCubes = make(map[string]int)
+	visitedCubes[cube.Key()] = 0
 	for i := 1; i <= max; i++ {
 		solved, solution := cube.goSolve(i)
 		if solved {
@@ -12,15 +18,6 @@ func (cube *Cube) Solve(max int) string {
 		}
 	}
 	return fmt.Sprintf("No solution up to %d moves!", max)
-}
-
-func pow(a, b int) int {
-	result := 1
-	for 0 != b {
-		result *= a
-		b--
-	}
-	return result
 }
 
 func (cube *Cube) goSolve(max int) (bool, string) {
@@ -55,7 +52,11 @@ func (cube Cube) solve(max int, moves string, lastMove string, ch chan string) {
 			newCube := cube
 			move := newCube.Move(m, i)
 			if IsReverse(move, lastMove) {
-				newCube.sendDummyOnCh(max-1, ch)
+				sendDummyOnCh(max-1, ch)
+				continue
+			}
+			if visited(&newCube, max-1) {
+				sendDummyOnCh(max-1, ch)
 				continue
 			}
 			go newCube.solve(max-1, moves+move, move, ch)
@@ -63,8 +64,30 @@ func (cube Cube) solve(max int, moves string, lastMove string, ch chan string) {
 	}
 }
 
-func (cube *Cube) sendDummyOnCh(level int, ch chan string) {
-	for i := 0; i < pow(6*cube.Size(), level); i++ {
+func sendDummyOnCh(level int, ch chan string) {
+	for i := 0; i < pow(6*size, level); i++ {
 		ch <- ""
 	}
+}
+
+func pow(a, b int) int {
+	result := 1
+	for 0 != b {
+		result *= a
+		b--
+	}
+	return result
+}
+
+func visited(cube *Cube, remainingSteps int) bool {
+	key := cube.Key()
+	defer mux.Unlock()
+	mux.Lock()
+	remSteps, exists := visitedCubes[key]
+	if exists && remSteps >= remainingSteps {
+		return true
+	}
+
+	visitedCubes[key] = remainingSteps
+	return false
 }
