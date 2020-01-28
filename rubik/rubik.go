@@ -222,7 +222,7 @@ func (cube *Cube) FaceTurnCCW(f int) string {
 }
 
 func (cube *Cube) Solved() bool {
-	for i := 0; i < size; i++ {
+	for i := 0; i < 6; i++ {
 		face := cube.faces(i)
 		color := face[0][0]
 		// fmt.Printf("\ncolor is: %c: ", color)

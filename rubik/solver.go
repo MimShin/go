@@ -8,8 +8,11 @@ import (
 var visitedCubes map[string]int
 var mux sync.Mutex
 
+// var cubes []*Cube
+
 func (cube *Cube) Solve(max int) string {
 	visitedCubes = make(map[string]int)
+	// cubes = make([]*Cube)
 	visitedCubes[cube.Key()] = 0
 	for i := 1; i <= max; i++ {
 		solved, solution := cube.goSolve(i)
