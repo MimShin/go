@@ -1,8 +1,11 @@
 package rubik
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
+	"regexp"
 	"strings"
 )
 
@@ -13,8 +16,10 @@ type Face [size][size]byte
 
 // Cube -- a Rubiks cube
 type Cube struct {
-	front, back, top, bottom, left, right Face
+	top, bottom, left, right, front, back Face
 }
+
+var re = regexp.MustCompile(`[^a-zA-Z0-9]`)
 
 // Init -- initalizes the cube
 func (cube *Cube) Init() {
@@ -23,8 +28,8 @@ func (cube *Cube) Init() {
 		for j := 0; j < size; j++ {
 			cube.top[i][j] = 'W'
 			cube.bottom[i][j] = 'Y'
-			cube.right[i][j] = 'B'
 			cube.left[i][j] = 'G'
+			cube.right[i][j] = 'B'
 			cube.front[i][j] = 'R'
 			cube.back[i][j] = 'O'
 		}
@@ -38,13 +43,25 @@ func (cube *Cube) faces(i int) *Face {
 	case 1:
 		return &cube.bottom
 	case 2:
-		return &cube.front
-	case 3:
-		return &cube.back
-	case 4:
-		return &cube.right
-	default:
 		return &cube.left
+	case 3:
+		return &cube.right
+	case 4:
+		return &cube.front
+	default:
+		return &cube.back
+	}
+}
+
+func (cube *Cube) Fill(str string) {
+	str = re.ReplaceAllString(str, "")
+	for i := 0; i < 6; i++ {
+		for r := 0; r < size; r++ {
+			for c := 0; c < size; c++ {
+				fmt.Println(i, r, c, i*size*size+r*size+c)
+				cube.faces(i)[r][c] = str[i*size*size+r*size+c]
+			}
+		}
 	}
 }
 
@@ -297,4 +314,21 @@ func (face *Face) turnCCW() {
 				face[r][c], face[size-1-c][r], face[size-1-r][size-1-c], face[c][size-1-r]
 		}
 	}
+}
+
+func (cube *Cube) Read() {
+
+	fmt.Print("Enter your cube as top, bottom, left, right, front, back faces:\n")
+	fmt.Println("Example:\nWWW WWW WWW  YYY YYY YYY  GGG GGG GGG  BBB BBB BBB  RRR RRR RRR  OOO OOO OOO")
+	reader := bufio.NewReader(os.Stdin)
+	text := ""
+	for len(text) < size*size*6 {
+		line, _ := reader.ReadString('\n')
+		text += re.ReplaceAllString(line, "")
+	}
+	cube.Fill(text)
+}
+
+func (cube *Cube) Print() {
+	fmt.Println(cube.String())
 }

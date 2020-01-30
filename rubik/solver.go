@@ -2,6 +2,7 @@ package rubik
 
 import (
 	"fmt"
+	"strconv"
 	"sync"
 )
 
@@ -11,6 +12,10 @@ var mux sync.Mutex
 // var cubes []*Cube
 
 func (cube *Cube) Solve(max int) string {
+	if cube.Solved() {
+		return fmt.Sprintf("Cube is already solved!")
+	}
+
 	visitedCubes = make(map[string]int)
 	// cubes = make([]*Cube)
 	visitedCubes[cube.Key()] = 0
@@ -26,9 +31,15 @@ func (cube *Cube) Solve(max int) string {
 func (cube *Cube) goSolve(max int) (bool, string) {
 	chn := make(chan string)
 	go cube.solve(max, "", "x", chn)
-	for i := 0; i < pow(6*cube.Size(), max); i++ {
+	for i := 0; i < pow(6*size, max); i++ {
 		solution := <-chn
-		// fmt.Printf("%d: %s, %s\n", i, solution, more)
+
+		// branch cut
+		if level, err := strconv.Atoi(solution); err == nil {
+			i += pow(6*size, level)
+			continue
+		}
+
 		if solution != "" {
 			return true, solution
 		}
@@ -50,26 +61,16 @@ func (cube Cube) solve(max int, moves string, lastMove string, ch chan string) {
 		return
 	}
 
-	for i := 0; i < cube.Size(); i++ {
+	for i := 0; i < size; i++ {
 		for m := 0; m < 6; m++ {
 			newCube := cube
 			move := newCube.Move(m, i)
-			if IsReverse(move, lastMove) {
-				sendDummyOnCh(max-1, ch)
-				continue
-			}
-			if visited(&newCube, max-1) {
-				sendDummyOnCh(max-1, ch)
+			if IsReverse(move, lastMove) || visited(&newCube, max-1) {
+				ch <- strconv.Itoa(max - 1)
 				continue
 			}
 			go newCube.solve(max-1, moves+move, move, ch)
 		}
-	}
-}
-
-func sendDummyOnCh(level int, ch chan string) {
-	for i := 0; i < pow(6*size, level); i++ {
-		ch <- ""
 	}
 }
 
