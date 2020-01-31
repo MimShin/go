@@ -58,7 +58,7 @@ func (cube *Cube) Fill(str string) {
 	for i := 0; i < 6; i++ {
 		for r := 0; r < size; r++ {
 			for c := 0; c < size; c++ {
-				fmt.Println(i, r, c, i*size*size+r*size+c)
+				// fmt.Println(i, r, c, i*size*size+r*size+c)
 				cube.faces(i)[r][c] = str[i*size*size+r*size+c]
 			}
 		}
@@ -131,7 +131,7 @@ func (cube *Cube) String() string {
 }
 
 func (cube *Cube) RowTurnCW(r int) string {
-	notation := fmt.Sprintf("%d%c\n", r, '<')
+	notation := fmt.Sprintf("%d%c\n", r+1, '<')
 	for i := 0; i < size; i++ {
 		cube.left[r][i], cube.front[r][i], cube.right[r][i], cube.back[r][i] =
 			cube.front[r][i], cube.right[r][i], cube.back[r][i], cube.left[r][i]
@@ -149,7 +149,7 @@ func (cube *Cube) RowTurnCW(r int) string {
 }
 
 func (cube *Cube) RowTurnCCW(r int) string {
-	notation := fmt.Sprintf("%d%c\n", r, '>')
+	notation := fmt.Sprintf("%d%c\n", r+1, '>')
 	for i := 0; i < size; i++ {
 		cube.right[r][i], cube.front[r][i], cube.left[r][i], cube.back[r][i] =
 			cube.front[r][i], cube.left[r][i], cube.back[r][i], cube.right[r][i]
@@ -167,7 +167,7 @@ func (cube *Cube) RowTurnCCW(r int) string {
 }
 
 func (cube *Cube) ColTurnUp(c int) string {
-	notation := fmt.Sprintf("%d%c\n", c, '^')
+	notation := fmt.Sprintf("%d%c\n", c+1, '^')
 	for i := 0; i < size; i++ {
 		cube.top[i][c], cube.front[i][c], cube.bottom[i][c], cube.back[size-1-i][size-1-c] =
 			cube.front[i][c], cube.bottom[i][c], cube.back[size-i-1][size-c-1], cube.top[i][c]
@@ -185,7 +185,7 @@ func (cube *Cube) ColTurnUp(c int) string {
 }
 
 func (cube *Cube) ColTurnDn(c int) string {
-	notation := fmt.Sprintf("%d%c\n", c, 'v')
+	notation := fmt.Sprintf("%d%c\n", c+1, 'v')
 	for i := 0; i < size; i++ {
 		cube.front[i][c], cube.bottom[i][c], cube.back[size-i-1][size-c-1], cube.top[i][c] =
 			cube.top[i][c], cube.front[i][c], cube.bottom[i][c], cube.back[size-1-i][size-1-c]
@@ -203,7 +203,7 @@ func (cube *Cube) ColTurnDn(c int) string {
 }
 
 func (cube *Cube) FaceTurnCW(f int) string {
-	notation := fmt.Sprintf("%d%s\n", f, "ov")
+	notation := fmt.Sprintf("%d%s\n", f+1, "ov")
 	for i := 0; i < size; i++ {
 		cube.left[i][size-1-f], cube.top[size-1-f][size-1-i], cube.right[size-1-i][f], cube.bottom[f][i] =
 			cube.bottom[f][i], cube.left[i][size-1-f], cube.top[size-1-f][size-1-i], cube.right[size-1-i][f]
@@ -221,7 +221,7 @@ func (cube *Cube) FaceTurnCW(f int) string {
 }
 
 func (cube *Cube) FaceTurnCCW(f int) string {
-	notation := fmt.Sprintf("%d%s\n", f, "o^")
+	notation := fmt.Sprintf("%d%s\n", f+1, "o^")
 	for i := 0; i < size; i++ {
 		cube.bottom[f][i], cube.left[i][size-1-f], cube.top[size-1-f][size-1-i], cube.right[size-1-i][f] =
 			cube.left[i][size-1-f], cube.top[size-1-f][size-1-i], cube.right[size-1-i][f], cube.bottom[f][i]
@@ -293,7 +293,7 @@ func IsReverse(move1, move2 string) bool {
 func (cube *Cube) RandomMove() string {
 	//rand.Seed(time.Now().UnixNano())
 	m := rand.Intn(6)
-	i := rand.Intn(3)
+	i := rand.Intn(size)
 
 	return cube.Move(m, i)
 }
