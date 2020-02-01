@@ -15,14 +15,14 @@ var visitedCubes map[string]int
 var mux sync.Mutex
 var nodes []Node
 
-func Solve(cube *Cube, max int) string {
+func Solve(cube Cube, max int) string {
 	if cube.Solved() {
 		return fmt.Sprintf("Cube is already solved!")
 	}
 
 	chn := make(chan Node)
 
-	nodes = []Node{Node{*cube, ""}}
+	nodes = []Node{Node{cube, ""}}
 	visitedCubes = make(map[string]int)
 	visitedCubes[cube.Key()] = 0
 
@@ -39,7 +39,7 @@ func Solve(cube *Cube, max int) string {
 				if n.Cube.Solved() {
 					return n.Moves
 				}
-				if !visited(&n.Cube) {
+				if !visited(n.Cube) {
 					newNodes = append(newNodes, n)
 				}
 			case <-time.After(1 * time.Second):
@@ -62,7 +62,7 @@ func move(n Node, ch chan Node) {
 	}
 }
 
-func visited(cube *Cube) bool {
+func visited(cube Cube) bool {
 	key := cube.Key()
 	defer mux.Unlock()
 	mux.Lock()

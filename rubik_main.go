@@ -19,14 +19,14 @@ func main() {
 	// c.Fill("wwwwwwwww yoybygyry bbbbbbbyb gggggggyg oooooooyo rrrrrrryr")
 	// c.Fill("wwwwwwwww yyygybyyy bbbbbbbob gggggggyg oooooooyo rrrrrrrrr")
 
-	max := 8
+	max := 9
 	for i := 0; i < max; i++ {
 		fmt.Println(c.RandomMove())
 	}
 	c.Print()
 
 	start := time.Now()
-	solution := rubik.Solve(&c, max)
+	solution := rubik.Solve(c, max)
 	fmt.Println(solution)
 	fmt.Printf("Elapsed time: %s\n", time.Since(start))
 }
