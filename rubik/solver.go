@@ -7,8 +7,9 @@ import (
 )
 
 type Node = struct {
-	Cube  Cube
-	Moves string
+	Cube         Cube
+	Moves        string
+	LastI, LastM int
 }
 
 var visitedCubes map[string]int
@@ -22,7 +23,7 @@ func Solve(cube Cube, max int) string {
 
 	chn := make(chan Node)
 
-	nodes = []Node{Node{cube, ""}}
+	nodes = []Node{Node{cube, "", -1, -1}}
 	visitedCubes = make(map[string]int)
 	visitedCubes[cube.Key()] = 0
 
@@ -39,15 +40,12 @@ func Solve(cube Cube, max int) string {
 				if n.Cube.Solved() {
 					return n.Moves
 				}
-				if !visited(n.Cube) {
-					newNodes = append(newNodes, n)
-				}
-			case <-time.After(1 * time.Second):
+				newNodes = append(newNodes, n)
+			case <-time.After(100 * time.Millisecond):
 				nodes = newNodes
 				timeout = true
 			}
 		}
-		//return fmt.Sprintf("No solution with %d moves!", i)
 	}
 	return fmt.Sprintf("No solution up to %d moves!", max)
 }
@@ -55,9 +53,17 @@ func Solve(cube Cube, max int) string {
 func move(n Node, ch chan Node) {
 	for i := 0; i < size; i++ {
 		for m := 0; m < 6; m++ {
+			if n.LastI == i && n.LastM+m == 5 { // is reverse move
+				continue
+			}
+
 			newCube := n.Cube
 			move := newCube.Move(m, i)
-			ch <- Node{newCube, n.Moves + move}
+			if visited(newCube) {
+				continue
+			}
+
+			ch <- Node{newCube, n.Moves + move, i, m}
 		}
 	}
 }
