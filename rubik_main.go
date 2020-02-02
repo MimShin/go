@@ -10,6 +10,7 @@ func main() {
 
 	var c rubik.Cube
 	c.Init()
+	c.Print()
 	// c.Read()
 	// c.Fill("grog ybbb ywwg owyy bwro gorr")
 	// c.Fill("bbog rwwg yboy wory yrgb wrog")

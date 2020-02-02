@@ -10,6 +10,23 @@ import (
 )
 
 const size = 3
+const fg = "\u001b[38;5;"
+const bg = "\u001b[48;5;"
+const red = fg + "1m"
+const green = fg + "2m"
+const blue = fg + "4m"
+const white = fg + "15m"
+const yellow = fg + "11m"
+const orange = fg + "202m"
+const nocolor = white
+const cell = "\u2588\u258a"
+
+const left = "⥢"
+const right = "⥤"
+const up = "⥣"
+const down = "⥥"
+const cw = "⤵"
+const ccw = "⤴"
 
 // Face -- a face of the Rubiks cube
 type Face [size][size]byte
@@ -130,8 +147,77 @@ func (cube *Cube) String() string {
 	return s
 }
 
+func colorString(c byte) string {
+	switch c {
+	case 'R':
+		return red + cell + nocolor
+	case 'G':
+		return green + cell + nocolor
+	case 'B':
+		return blue + cell + nocolor
+	case 'W':
+		return white + cell + nocolor
+	case 'Y':
+		return yellow + cell + nocolor
+	case 'O':
+		return orange + cell + nocolor
+	default:
+		return string(c)
+	}
+}
+
+func (cube *Cube) ColorString() string {
+	s := ""
+
+	for r := 0; r < size; r++ {
+		s += "\n " + strings.Repeat(" ", size*2)
+		for c := 0; c < size; c++ {
+			s += colorString(cube.top[r][c])
+		}
+	}
+
+	s += "\n"
+	for r := 0; r < size; r++ {
+		s += "\n"
+		for c := 0; c < size; c++ {
+			s += colorString(cube.left[r][c])
+		}
+		s += " "
+		for c := 0; c < size; c++ {
+			s += colorString(cube.front[r][c])
+		}
+		s += " "
+		for c := 0; c < size; c++ {
+			s += colorString(cube.right[r][c])
+		}
+		s += " "
+		for c := 0; c < size; c++ {
+			s += colorString(cube.back[r][c])
+		}
+	}
+
+	s += "\n"
+	for r := 0; r < size; r++ {
+		s += "\n " + strings.Repeat(" ", size*2)
+		for c := 0; c < size; c++ {
+			s += colorString(cube.bottom[r][c])
+		}
+	}
+
+	s += "\n"
+
+	/*
+		for y := 0; y < size; y++ {
+			for z := 0; z < size; z++ {
+				s += c.cube[x][y][z].String()
+			}
+		}
+	*/
+	return s
+}
+
 func (cube *Cube) RowTurnCW(r int) string {
-	notation := fmt.Sprintf("%d%c\n", r+1, '<')
+	notation := fmt.Sprintf("%d%s\n", r+1, left)
 	for i := 0; i < size; i++ {
 		cube.left[r][i], cube.front[r][i], cube.right[r][i], cube.back[r][i] =
 			cube.front[r][i], cube.right[r][i], cube.back[r][i], cube.left[r][i]
@@ -149,7 +235,7 @@ func (cube *Cube) RowTurnCW(r int) string {
 }
 
 func (cube *Cube) RowTurnCCW(r int) string {
-	notation := fmt.Sprintf("%d%c\n", r+1, '>')
+	notation := fmt.Sprintf("%d%s\n", r+1, right)
 	for i := 0; i < size; i++ {
 		cube.right[r][i], cube.front[r][i], cube.left[r][i], cube.back[r][i] =
 			cube.front[r][i], cube.left[r][i], cube.back[r][i], cube.right[r][i]
@@ -167,7 +253,7 @@ func (cube *Cube) RowTurnCCW(r int) string {
 }
 
 func (cube *Cube) ColTurnUp(c int) string {
-	notation := fmt.Sprintf("%d%c\n", c+1, '^')
+	notation := fmt.Sprintf("%d%s\n", c+1, up)
 	for i := 0; i < size; i++ {
 		cube.top[i][c], cube.front[i][c], cube.bottom[i][c], cube.back[size-1-i][size-1-c] =
 			cube.front[i][c], cube.bottom[i][c], cube.back[size-i-1][size-c-1], cube.top[i][c]
@@ -185,7 +271,7 @@ func (cube *Cube) ColTurnUp(c int) string {
 }
 
 func (cube *Cube) ColTurnDn(c int) string {
-	notation := fmt.Sprintf("%d%c\n", c+1, 'v')
+	notation := fmt.Sprintf("%d%s\n", c+1, down)
 	for i := 0; i < size; i++ {
 		cube.front[i][c], cube.bottom[i][c], cube.back[size-i-1][size-c-1], cube.top[i][c] =
 			cube.top[i][c], cube.front[i][c], cube.bottom[i][c], cube.back[size-1-i][size-1-c]
@@ -203,7 +289,7 @@ func (cube *Cube) ColTurnDn(c int) string {
 }
 
 func (cube *Cube) FaceTurnCW(f int) string {
-	notation := fmt.Sprintf("%d%s\n", f+1, "ov")
+	notation := fmt.Sprintf("%d%s\n", f+1, cw)
 	for i := 0; i < size; i++ {
 		cube.left[i][size-1-f], cube.top[size-1-f][size-1-i], cube.right[size-1-i][f], cube.bottom[f][i] =
 			cube.bottom[f][i], cube.left[i][size-1-f], cube.top[size-1-f][size-1-i], cube.right[size-1-i][f]
@@ -221,7 +307,7 @@ func (cube *Cube) FaceTurnCW(f int) string {
 }
 
 func (cube *Cube) FaceTurnCCW(f int) string {
-	notation := fmt.Sprintf("%d%s\n", f+1, "o^")
+	notation := fmt.Sprintf("%d%s\n", f+1, ccw)
 	for i := 0; i < size; i++ {
 		cube.bottom[f][i], cube.left[i][size-1-f], cube.top[size-1-f][size-1-i], cube.right[size-1-i][f] =
 			cube.left[i][size-1-f], cube.top[size-1-f][size-1-i], cube.right[size-1-i][f], cube.bottom[f][i]
@@ -264,26 +350,23 @@ func (cube *Cube) Move(m, i int) string {
 	case 2:
 		return cube.FaceTurnCW(i)
 	case 3:
-		return cube.RowTurnCCW(i)
+		return cube.FaceTurnCCW(i)
 	case 4:
 		return cube.ColTurnDn(i)
 	case 5:
-		return cube.FaceTurnCCW(i)
+		return cube.RowTurnCCW(i)
 	}
 	return "undefined move!"
 }
 
 func IsReverse(move1, move2 string) bool {
-	if move1[0] != move2[0] || len(move1) != len(move2) {
+
+	if move1[0] != move2[0] {
 		return false
 	}
 
-	if move1[1] == '<' && move2[1] == '>' || move1[1] == '>' && move2[1] == '<' {
-		return true
-	}
-
-	l := len(move1) - 1
-	if move1[l] == '^' && move2[l] == 'v' || move1[l] == 'v' && move2[l] == '^' {
+	d1, d2 := move1[1:1], move2[1:1]
+	if d1 == left && d2 == right || d1 == up && d2 == down || d1 == cw && d2 == ccw {
 		return true
 	}
 
@@ -330,5 +413,6 @@ func (cube *Cube) Read() {
 }
 
 func (cube *Cube) Print() {
-	fmt.Println(cube.String())
+	//fmt.Println(cube.String())
+	fmt.Println(cube.ColorString())
 }

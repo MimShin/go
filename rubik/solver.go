@@ -41,7 +41,7 @@ func Solve(cube Cube, max int) string {
 					return n.Moves
 				}
 				newNodes = append(newNodes, n)
-			case <-time.After(100 * time.Millisecond):
+			case <-time.After(400 * time.Millisecond):
 				nodes = newNodes
 				timeout = true
 			}
@@ -59,11 +59,9 @@ func move(n Node, ch chan Node) {
 
 			newCube := n.Cube
 			move := newCube.Move(m, i)
-			if visited(newCube) {
-				continue
+			if !visited(newCube) {
+				ch <- Node{newCube, n.Moves + move, i, m}
 			}
-
-			ch <- Node{newCube, n.Moves + move, i, m}
 		}
 	}
 }
