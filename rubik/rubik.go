@@ -84,7 +84,7 @@ func (cube *Cube) Fill(str string) {
 
 func (cube *Cube) Size() int { return size }
 
-func (cube *Cube) Key() string {
+func (cube *Cube) KeySimple() string {
 	key := ""
 	for i := 0; i < 6; i++ {
 		f := cube.faces(i)
@@ -94,6 +94,51 @@ func (cube *Cube) Key() string {
 			}
 		}
 	}
+	return key
+}
+
+func (cube *Cube) Key() string {
+
+	var kr, kg, kb, kw, ky, ko int
+	for i := 0; i < 6; i++ {
+		f := cube.faces(i)
+		k := 0
+		for r := 0; r < size; r++ {
+			for c := 0; c < size; c++ {
+				switch f[r][c] {
+				case 'R':
+					k += r*size + c + 1
+				case 'G':
+					k += (r*size + c + 1) << 4
+				case 'B':
+					k += (r*size + c + 1) << 8
+				case 'W':
+					k += (r*size + c + 1) << 12
+				case 'Y':
+					k += (r*size + c + 1) << 16
+				case 'O':
+					k += (r*size + c + 1) << 20
+				}
+			}
+		}
+		switch f[size/2][size/2] {
+		case 'R':
+			kr = k
+		case 'G':
+			kg = k
+		case 'B':
+			kb = k
+		case 'W':
+			kw = k
+		case 'Y':
+			ky = k
+		case 'O':
+			ko = k
+		}
+	}
+
+	key := fmt.Sprintf("%08x%08x%08x%08x%08x%08x", kr, kg, kb, kw, ky, ko)
+	// fmt.Println("key: ", key)
 	return key
 }
 

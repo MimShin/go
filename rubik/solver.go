@@ -53,6 +53,7 @@ func Solve(cube Cube, max int) string {
 func move(n Node, ch chan Node) {
 	for i := 0; i < size; i++ {
 		for m := 0; m < 6; m++ {
+
 			if n.LastI == i && n.LastM+m == 5 { // is reverse move
 				continue
 			}
