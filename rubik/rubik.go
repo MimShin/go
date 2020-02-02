@@ -18,7 +18,7 @@ const blue = fg + "4m"
 const white = fg + "15m"
 const yellow = fg + "11m"
 const orange = fg + "202m"
-const nocolor = white
+const reset = "\u001b[0m"
 const cell = "\u2588\u258a"
 
 const left = "⥢"
@@ -195,17 +195,17 @@ func (cube *Cube) String() string {
 func colorString(c byte) string {
 	switch c {
 	case 'R':
-		return red + cell + nocolor
+		return red + cell + reset
 	case 'G':
-		return green + cell + nocolor
+		return green + cell + reset
 	case 'B':
-		return blue + cell + nocolor
+		return blue + cell + reset
 	case 'W':
-		return white + cell + nocolor
+		return white + cell + reset
 	case 'Y':
-		return yellow + cell + nocolor
+		return yellow + cell + reset
 	case 'O':
-		return orange + cell + nocolor
+		return orange + cell + reset
 	default:
 		return string(c)
 	}
