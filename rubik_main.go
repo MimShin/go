@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"rubik"
+	"strconv"
 	"time"
 )
 
@@ -34,7 +36,8 @@ func main() {
 		fmt.Println(c.Key())
 	*/
 
-	max := 9
+	max, _ := strconv.Atoi(os.Args[1])
+
 	for i := 0; i < max; i++ {
 		fmt.Println(c.RandomMove())
 	}

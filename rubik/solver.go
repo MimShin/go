@@ -27,7 +27,7 @@ func Solve(cube Cube, max int) string {
 	visitedCubes = make(map[string]int)
 	visitedCubes[cube.Key()] = 0
 
-	for i := 0; i < max; i++ {
+	for i := 1; i <= max; i++ {
 		fmt.Printf("Nodes @level %d: %d\n", i, len(nodes))
 		for _, node := range nodes {
 			go move(node, chn)
@@ -41,7 +41,8 @@ func Solve(cube Cube, max int) string {
 					return n.Moves
 				}
 				newNodes = append(newNodes, n)
-			case <-time.After(400 * time.Millisecond):
+
+			case <-time.After(1000 * time.Millisecond):
 				nodes = newNodes
 				timeout = true
 			}
